@@ -1,0 +1,9 @@
+# Node.js
+node_modules/
+npm-debug.log
+.env
+
+# Optional: if you have specific build outputs or logs
+build/
+logs/
+*.log
