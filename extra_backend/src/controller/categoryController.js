@@ -1,4 +1,4 @@
-import Category from "../models/Category";
+import Category from "../models/Category.js";
 import mongoose from "mongoose";
 
 const createCategory = async (req, res, next) => {
@@ -21,7 +21,7 @@ const createCategory = async (req, res, next) => {
 
         const newCategory = await Category.create({
             categoryName: categoryName,
-            color: color
+            color: color.replace(/^#/, '')
         });
 
         res.status(201).json({
@@ -71,25 +71,51 @@ const getCategoryById = async (req, res, next) => {
     }
 }
 
+const getCategoryByName = async (req, res, next) => {
+    try{
+        const { categoryName } = req.params;
+
+        if(!categoryName.trim){
+            return res.status(400).json({message: 'Please enter a valid category name'});
+        }
+
+        const category = await Category.findOne({categoryName: {$regex: new RegExp(categoryName, 'i')}});
+
+        if(!category){
+            return res.status(404).json({message: 'Category not found'});
+        }
+
+        res.status(200).json(category);
+    } catch(error){
+        next(error);
+    }
+};
+
 const updateCategory = async (req, res, next) => {
     try{
         const { id } = req.params;
-        const { categoryName, color } = req.body;
 
         if(!mongoose.Types.ObjectId.isValid(id)){
             return res.status(400).json({message: 'Invalid Category ID format'});
         }
 
         const category = await Category.findById(id);
+        
         if(!category){
             return res.status(404).json({message: 'Category not found'});
         }
 
-        const updatedCategory = await Category.findByIdAndUpdate(
-            id,
-            { categoryName, color },
-            { new: true, runValidators: true}
-        );
+        if (req.body.color !== undefined) {
+            req.body.color = req.body.color.replace(/^#/, '');
+        }
+
+        Object.assign(category, req.body);
+
+        if(Object.keys(req.body).length === 0){
+            return res.status(200).json({message: 'No updated fields provided'});
+        }
+
+        const updatedCategory = await category.save();
 
         res.status(200).json({
             message: 'Category updated successfully',
@@ -97,8 +123,8 @@ const updateCategory = async (req, res, next) => {
         });
     } catch (error){
         if(error.name === 'ValidationError'){
-            const messages = Object.values(error.errors).map(val => val.messages);
-            return res.status(400).json({message: messages.join(', ')});
+            const messages = Object.values(error.errors).map(val => val.message);
+            return res.status(400).json({message: `Error validating category: ${messages.join(', ')}`});
         }
 
         if(error.code === 11000){
@@ -134,6 +160,7 @@ export {
     createCategory,
     getCategory,
     getCategoryById,
+    getCategoryByName,
     updateCategory,
     deleteCategory
 }
