@@ -3,6 +3,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 
+import categoryRoutes from './src/routes/categoryRoutes.js'; 
+
 const app = express();
 
 const PORT = process.env.PORT;
@@ -27,30 +29,24 @@ app.use(express.json())
 
 if(NODE_ENV !== 'production'){
     app.use(cors());
-    console.log('CORS enebaled for development environment');
+    console.log('CORS enabled for development environment');
 } else {
     console.log('CORS is NOT enabled for production environment');
 }
-
-app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-    next();
-})
 
 app.get('/', (req, res) => {
     res.send('Welcome to ExTra from the backend');
 });
 
-app.get('/users', (req, res) => {
-    res.send('This is the USERS PAGE');
-})
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
 
-app.get('/register', (req, res) => {
-    res.send('This is the REGISTRATION PAGE');
-})
+app.use('/api/categories', categoryRoutes);
 
 app.use((req, res, next) => {
-    res.status(404).send('Sorry the requested resource was not found')
+    res.status(404).json({message: 'Resource not found'})
 })
 
 app.use((err, req, res, next) => {
