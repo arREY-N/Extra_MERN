@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 
 import categoryRoutes from './src/routes/categoryRoutes.js'; 
+import flowRoutes from './src/routes/flowRoutes.js'
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/categories', categoryRoutes);
+app.use('/api/flows', flowRoutes);
 
 app.use((req, res, next) => {
     res.status(404).json({message: 'Resource not found'})
