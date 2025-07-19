@@ -14,7 +14,7 @@ const createCategory = async (req, res, next) => {
         const existingCategory = await Category.findOne({categoryName});
         
         if(existingCategory){
-            return res.status(400).json({
+            return res.status(409).json({
                 message: 'Category with this name already exists.'
             });
         }
@@ -36,7 +36,7 @@ const createCategory = async (req, res, next) => {
 
         if(error.code === 11000){
             const field = Object.keys(error.keyValue)[0];
-            return res.status(400).json({message: `A category with that ${field} already exists`})
+            return res.status(409).json({message: `A category with that ${field} already exists`})
         }
         next(error);
     }
@@ -129,7 +129,7 @@ const updateCategory = async (req, res, next) => {
 
         if(error.code === 11000){
             const field = Object.keys(error.keyValue)[0];
-            return res.status(400).json({message: `A category with that ${field} already exists`})
+            return res.status(409).json({message: `A category with that ${field} already exists`})
         }
         next(error);
     }
