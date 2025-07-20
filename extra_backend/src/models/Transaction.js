@@ -30,6 +30,16 @@ const transactionSchema = mongoose.Schema(
     },{ timestamps: true }
 )
 
+transactionSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+    }
+})
+
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
 export default Transaction;
