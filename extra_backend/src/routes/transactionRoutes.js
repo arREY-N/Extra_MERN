@@ -6,16 +6,17 @@ import {
     updateTransaction,
     deleteTransaction
 } from '../controller/transactionController.js'
+import protect from "../middleware/authMiddleware.js";
 
 const router = Router();
 
 router.route('/')
-    .get(getTransactions)
-    .post(createTransaction);
+    .get(protect, getTransactions)
+    .post(protect, createTransaction);
 
 router.route('/:id')
-    .get(getTransactionById)
-    .put(updateTransaction)
-    .delete(deleteTransaction);
+    .get(protect, getTransactionById)
+    .put(protect, updateTransaction)
+    .delete(protect, deleteTransaction);
 
 export default router;
