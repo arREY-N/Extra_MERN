@@ -7,6 +7,7 @@ import {
     updateUser,
     deleteUser
 } from '../controller/userController.js'
+import protect from "../middleware/authMiddleware.js";
 
 const router = Router();
 
@@ -16,8 +17,8 @@ router.route('/')
 
 router.route('/id/:id')
     .get(getUserById)
-    .put(updateUser)
-    .delete(deleteUser);
+    .put(protect, updateUser)
+    .delete(protect, deleteUser);
 
 router.route('/username/:username')
     .get(getUserByUsername);
