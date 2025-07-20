@@ -94,6 +94,7 @@ const getUserByUsername = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
     try{
         const { id } = req.params;
+        const user = req.user.id;
         
         if(!mongoose.Types.ObjectId.isValid(id)){
             return res.status(400).json({message: 'Invalid User ID format'});
@@ -101,10 +102,15 @@ const updateUser = async (req, res, next) => {
 
         const existingUser = await User.findById(id);
 
+        
         if(!existingUser){
             return res.status(404).json({message: 'User not found'});
         }
-
+        
+        if(user.toString() !== existingUser.id.toString()){
+            return res.status(401).json({message: 'Unauthorized to update this user'});
+        }
+        
         if(Object.keys(req.body).length === 0){
             return res.status(400).json({message: 'No updated field provided'});
         }
@@ -134,14 +140,19 @@ const updateUser = async (req, res, next) => {
 const deleteUser = async (req, res, next) => {
     try{
         const { id } = req.params;
+        const user = req.user.id;
 
         if(!mongoose.Types.ObjectId.isValid(id)){
             return res.status(400).json({message: 'Invalid User ID format'});
         }
 
-        const user = await User.findByIdAndDelete(id);
+        if(id.toString() !== user.toString()){
+            return res.status(401).json({message: 'Unauthorized to delete this user'});
+        }
 
-        if(!user){
+        const deletedUser = await User.findByIdAndDelete(id);
+
+        if(!deletedUser){
             return res.status(404).json({message: 'User not found'});
         }
 
