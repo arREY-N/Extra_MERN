@@ -9,9 +9,9 @@ import {
 
 const createTransaction = async (req, res, next) => {
     try{
-        let { item, amount, category, flow, user } = req.body;
+        let { item, amount, category, flow } = req.body;
         
-        // const user = req.user.id;
+        const user = req.user.id;
 
         if(!item || !item.trim() || !amount || !user || !flow){
             return res.status(400).json({message: 'Provide item name, amount, user ID, and flow ID'});
@@ -74,7 +74,13 @@ const createTransaction = async (req, res, next) => {
 
 const getTransactions = async (req, res, next) => {
     try{
-        const transactions = await Transaction.find().sort({updatedAt: 1});
+        const user  = req.user._id;
+        const transactions = await Transaction.find({user: user})
+                                                    .populate('user', 'username')
+                                                    .populate('category', 'categoryName')
+                                                    .populate('flow', 'flowName')
+                                                    .sort({updatedAt: -1});
+                                                    
         res.status(200).json(transactions);
     }catch(error){
         next(error);
@@ -89,7 +95,10 @@ const getTransactionById = async (req, res, next) => {
             return res.status(400).json({message: 'Invalid User ID format'});
         }
 
-        const transaction = await Transaction.findById(id);
+        const transaction = await Transaction.findById(id)
+                                                    .populate('user', 'username')
+                                                    .populate('category', 'categoryName')
+                                                    .populate('flow', 'flowName');
 
         if(!transaction){
             return res.status(404).json({message: 'Transaction not found'});
@@ -104,8 +113,8 @@ const getTransactionById = async (req, res, next) => {
 const updateTransaction = async (req, res, next) => {
     try{
         const { id } = req.params;
-        let { item, amount, category, flow, user } = req.body;
-        // const user = req.user.id;
+        let { item, amount, category, flow } = req.body;
+        const user = req.user.id;
 
         if(!mongoose.Types.ObjectId.isValid(id)){
             return res.status(400).json({message: 'Invalid transaction ID format'});
@@ -166,10 +175,6 @@ const updateTransaction = async (req, res, next) => {
             }
         }
 
-        if(!amount){
-            console.log('!amount');
-        }
-
         const updateData = {
             item: item ? item : existingTransaction.item,
             amount: amount ? amount : existingTransaction.amount,
@@ -181,7 +186,9 @@ const updateTransaction = async (req, res, next) => {
             id,
             updateData,
             {new: true, runValidators: true}
-        );
+        ).populate('user', 'username')
+            .populate('category', 'categoryName')
+            .populate('flow', 'flowName');
 
         res.status(200).json({
             message: 'Transaction updated successfully',
