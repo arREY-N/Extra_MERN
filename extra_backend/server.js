@@ -7,6 +7,7 @@ import categoryRoutes from './src/routes/categoryRoutes.js';
 import flowRoutes from './src/routes/flowRoutes.js';
 import userRoutes from './src/routes/userRoutes.js';
 import transactionRoutes from './src/routes/transactionRoutes.js';
+import authRoutes from './src/routes/authRoutes.js';
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/flows', flowRoutes);
 app.use('/api/users', userRoutes);
